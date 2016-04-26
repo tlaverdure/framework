@@ -52,6 +52,7 @@ class ServeCommand extends Command
                 throw new Exception("HHVM's built-in server requires HHVM >= 3.8.0.");
             }
         } else {
+            passthru("open http://{$host}:{$port}");
             passthru("{$binary} -S {$host}:{$port} {$base}/server.php");
         }
     }
