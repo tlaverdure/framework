@@ -56,6 +56,19 @@ class DatabaseQueue extends Queue implements QueueContract
     }
 
     /**
+     * Get the size of the queue.
+     *
+     * @param  string  $queue
+     * @return int
+     */
+    public function size($queue = null)
+    {
+        return $this->database->table($this->table)
+                    ->where('queue', $this->getQueue($queue))
+                    ->count();
+    }
+
+    /**
      * Push a new job onto the queue.
      *
      * @param  string  $job
@@ -314,26 +327,5 @@ class DatabaseQueue extends Queue implements QueueContract
     public function getDatabase()
     {
         return $this->database;
-    }
-
-    /**
-     * Get the expiration time in seconds.
-     *
-     * @return int|null
-     */
-    public function getExpire()
-    {
-        return $this->expire;
-    }
-
-    /**
-     * Set the expiration time in seconds.
-     *
-     * @param  int|null  $seconds
-     * @return void
-     */
-    public function setExpire($seconds)
-    {
-        $this->expire = $seconds;
     }
 }

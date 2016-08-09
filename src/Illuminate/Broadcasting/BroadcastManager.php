@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Illuminate\Broadcasting\Broadcasters\LogBroadcaster;
+use Illuminate\Broadcasting\Broadcasters\NullBroadcaster;
 use Illuminate\Broadcasting\Broadcasters\RedisBroadcaster;
 use Illuminate\Broadcasting\Broadcasters\PusherBroadcaster;
 use Illuminate\Contracts\Broadcasting\Factory as FactoryContract;
@@ -48,18 +49,22 @@ class BroadcastManager implements FactoryContract
     /**
      * Register the routes for handling broadcast authentication and sockets.
      *
-     * @param  array  $attributes
+     * @param  array|null  $attributes
      * @return void
      */
-    public function route(array $attributes = [])
+    public function routes(array $attributes = null)
     {
         if ($this->app->routesAreCached()) {
             return;
         }
 
-        $this->app['router']->group($attributes, function () {
-            $this->app['router']->post('/broadcasting/auth', BroadcastController::class.'@authenticate');
-            $this->app['router']->post('/broadcasting/socket', BroadcastController::class.'@rememberSocket');
+        $attributes = $attributes ?: ['middleware' => ['web']];
+
+        $router = $this->app['router'];
+
+        $router->group($attributes, function ($router) {
+            $router->post('/broadcasting/auth', BroadcastController::class.'@authenticate');
+            $router->post('/broadcasting/socket', BroadcastController::class.'@rememberSocket');
         });
     }
 
@@ -221,6 +226,17 @@ class BroadcastManager implements FactoryContract
         return new LogBroadcaster(
             $this->app->make('Psr\Log\LoggerInterface')
         );
+    }
+
+    /**
+     * Create an instance of the driver.
+     *
+     * @param  array  $config
+     * @return \Illuminate\Contracts\Broadcasting\Broadcaster
+     */
+    protected function createNullDriver(array $config)
+    {
+        return new NullBroadcaster;
     }
 
     /**

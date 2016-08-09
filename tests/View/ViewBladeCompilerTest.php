@@ -17,11 +17,12 @@ class ViewBladeCompilerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($compiler->isExpired('foo'));
     }
 
-    public function testIsExpiredReturnsTrueIfCachePathIsNull()
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testCannotConstructWithBadCachePath()
     {
-        $compiler = new BladeCompiler($files = $this->getFiles(), null);
-        $files->shouldReceive('exists')->never();
-        $this->assertTrue($compiler->isExpired('foo'));
+        new BladeCompiler($this->getFiles(), null);
     }
 
     public function testIsExpiredReturnsTrueWhenModificationTimesWarrant()
@@ -73,14 +74,6 @@ class ViewBladeCompilerTest extends PHPUnit_Framework_TestCase
         // trigger compilation with null $path
         $compiler->compile();
         $this->assertEquals('foo', $compiler->getPath());
-    }
-
-    public function testCompileDoesntStoreFilesWhenCachePathIsNull()
-    {
-        $compiler = new BladeCompiler($files = $this->getFiles(), null);
-        $files->shouldReceive('get')->never();
-        $files->shouldReceive('put')->never();
-        $compiler->compile('foo');
     }
 
     public function testEchosAreCompiled()
@@ -438,6 +431,18 @@ test
     {
         $compiler = new BladeCompiler($this->getFiles(), __DIR__);
         $string = '@foreach ($this->getUsers() as $user)
+test
+@endforeach';
+        $expected = '<?php $__currentLoopData = $this->getUsers(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getFirstLoop(); ?>
+test
+<?php endforeach; $__env->popLoop(); $loop = $__env->getFirstLoop(); ?>';
+        $this->assertEquals($expected, $compiler->compileString($string));
+    }
+
+    public function testForeachStatementsAreCompileWithUppercaseSyntax()
+    {
+        $compiler = new BladeCompiler($this->getFiles(), __DIR__);
+        $string = '@foreach ($this->getUsers() AS $user)
 test
 @endforeach';
         $expected = '<?php $__currentLoopData = $this->getUsers(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getFirstLoop(); ?>

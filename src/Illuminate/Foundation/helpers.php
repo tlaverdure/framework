@@ -199,6 +199,8 @@ if (! function_exists('cache')) {
      *
      * @param  dynamic  key|key,default|data,expiration|null
      * @return mixed
+     *
+     * @throws \Exception
      */
     function cache()
     {
@@ -587,7 +589,7 @@ if (! function_exists('request')) {
     /**
      * Get an instance of the current request or an input item from the request.
      *
-     * @param  string  $key
+     * @param  array|string  $key
      * @param  mixed   $default
      * @return \Illuminate\Http\Request|string|array
      */
@@ -595,6 +597,10 @@ if (! function_exists('request')) {
     {
         if (is_null($key)) {
             return app('request');
+        }
+
+        if (is_array($key)) {
+            return app('request')->only($key);
         }
 
         return app('request')->input($key, $default);
@@ -758,7 +764,7 @@ if (! function_exists('url')) {
      * @param  string  $path
      * @param  mixed   $parameters
      * @param  bool    $secure
-     * @return Illuminate\Contracts\Routing\UrlGenerator|string
+     * @return \Illuminate\Contracts\Routing\UrlGenerator|string
      */
     function url($path = null, $parameters = [], $secure = null)
     {

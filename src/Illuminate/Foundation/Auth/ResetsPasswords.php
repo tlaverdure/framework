@@ -54,7 +54,7 @@ trait ResetsPasswords
         // redirect them back to where they came from with their error message.
         return $response == Password::PASSWORD_RESET
                     ? $this->sendResetResponse($response)
-                    : $this->sendResetFailedResponse($response);
+                    : $this->sendResetFailedResponse($request, $response);
     }
 
     /**
@@ -102,10 +102,11 @@ trait ResetsPasswords
     /**
      * Get the response for a failed password reset.
      *
+     * @param  \Illuminate\Http\Request
      * @param  string  $response
      * @return \Illuminate\Http\Response
      */
-    protected function sendResetFailedResponse($response)
+    protected function sendResetFailedResponse(Request $request, $response)
     {
         return redirect()->back()
                     ->withInput($request->only('email'))
@@ -115,7 +116,7 @@ trait ResetsPasswords
     /**
      * Get the broker to be used during password reset.
      *
-     * @return PasswordBroker
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
      */
     public function broker()
     {
@@ -125,7 +126,7 @@ trait ResetsPasswords
     /**
      * Get the guard to be used during password reset.
      *
-     * @return \Illuminate\Contracts\Auth\Guard
+     * @return \Illuminate\Contracts\Auth\StatefulGuard
      */
     protected function guard()
     {

@@ -171,7 +171,9 @@ class Route
             $this->parametersWithoutNulls(), new ReflectionFunction($this->action['uses'])
         );
 
-        return call_user_func_array($this->action['uses'], $parameters);
+        $callable = $this->action['uses'];
+
+        return $callable(...array_values($parameters));
     }
 
     /**
@@ -424,9 +426,7 @@ class Route
     public function parameters()
     {
         if (isset($this->parameters)) {
-            return array_map(function ($value) {
-                return is_string($value) ? rawurldecode($value) : $value;
-            }, $this->parameters);
+            return $this->parameters;
         }
 
         throw new LogicException('Route is not bound.');

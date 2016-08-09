@@ -419,11 +419,22 @@ class SupportArrTest extends PHPUnit_Framework_TestCase
     {
         $array = [100, '200', 300, '400', 500];
 
-        $array = Arr::where($array, function ($key, $value) {
+        $array = Arr::where($array, function ($value, $key) {
             return is_string($value);
         });
 
         $this->assertEquals([1 => 200, 3 => 400], $array);
+    }
+
+    public function testWhereKey()
+    {
+        $array = ['10' => 1, 'foo' => 3, 20 => 2];
+
+        $array = Arr::where($array, function ($value, $key) {
+            return is_numeric($key);
+        });
+
+        $this->assertEquals(['10' => 1, 20 => 2], $array);
     }
 
     public function testForget()
